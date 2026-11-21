@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-mode="system" data-next="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,18 +7,24 @@
   <meta name="theme-color" content="#ffffff">
   <script>
     (function () {
-      var theme = null;
+      var mode = 'system';
 
       try {
-        theme = localStorage.getItem('theme');
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') mode = saved;
       } catch (error) {
-        theme = null;
+        mode = 'system';
       }
 
-      if (theme !== 'light' && theme !== 'dark') {
+      var theme = mode;
+      var next = mode === 'system' ? 'light' : mode === 'light' ? 'dark' : 'system';
+
+      if (mode === 'system') {
         theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       }
 
+      document.documentElement.dataset.mode = mode;
+      document.documentElement.dataset.next = next;
       document.documentElement.dataset.theme = theme;
 
       var meta = document.querySelector('meta[name="theme-color"]');
@@ -272,12 +278,51 @@
 
     footer nav {
       display: flex;
+      align-items: center;
       flex-wrap: wrap;
       gap: 12px;
     }
 
     .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      line-height: 1;
       cursor: pointer;
+    }
+
+    .theme-toggle:hover {
+      opacity: 0.72;
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 4px;
+      border-radius: 2px;
+    }
+
+    .theme-toggle svg {
+      display: none;
+      width: 14px;
+      height: 14px;
+    }
+
+    .theme-label {
+      display: none;
+    }
+
+    :root[data-next="system"] .theme-toggle .theme-icon-system,
+    :root[data-next="light"] .theme-toggle .theme-icon-light,
+    :root[data-next="dark"] .theme-toggle .theme-icon-dark,
+    :root[data-next="system"] .theme-label-system,
+    :root[data-next="light"] .theme-label-light,
+    :root[data-next="dark"] .theme-label-dark {
+      display: block;
     }
 
     /* Layout */
@@ -330,19 +375,53 @@
       <nav aria-label="Links">
         <a href="https://news.ycombinator.com/" target="_blank" rel="noopener noreferrer">news.ycombinator.com</a>
         <a href="https://github.com/parksb/hnfront" target="_blank" rel="noopener noreferrer">github.com/parksb/hnfront</a>
-        <a class="theme-toggle" href="#" aria-label="Switch to dark mode">dark</a>
+        <button type="button" class="theme-toggle" aria-label="Theme: system (click for light)" title="Theme: system (click for light)">
+          <svg class="theme-icon-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <defs>
+              <mask id="theme-system-cut-low" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                <path d="M 0 0 L 0 24 L 24 0 Z" fill="#ffffff"></path>
+                <path d="M 12 12 L 22 2 M 12 12 L 2 22" fill="none" stroke="#000000" stroke-width="3"></path>
+              </mask>
+              <mask id="theme-system-cut-high" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                <path d="M 24 0 L 24 24 L 0 24 Z" fill="#ffffff"></path>
+                <path d="M 12 12 L 22 2 M 12 12 L 2 22" fill="none" stroke="#000000" stroke-width="3"></path>
+              </mask>
+            </defs>
+            <g mask="url(#theme-system-cut-low)">
+              <path d="M 9.88 2.75 C 7.63 4.44 6.95 7.55 8.38 10.06 C 9.88 12.65 13.03 13.55 15.63 12.35"></path>
+              <path d="M 9.88 2.75 H 9.5 C 5.77 2.75 2.75 5.77 2.75 9.5 C 2.75 13.23 5.77 16.25 9.5 16.25 C 12.2 16.25 14.55 14.65 15.62 12.35"></path>
+            </g>
+            <g mask="url(#theme-system-cut-high)">
+              <path d="M 14.5 10.75 C 16.57 10.75 18.25 12.43 18.25 14.5 C 18.25 16.57 16.57 18.25 14.5 18.25 C 12.43 18.25 10.75 16.57 10.75 14.5 C 10.75 12.43 12.43 10.75 14.5 10.75 Z"></path>
+              <path d="M 14.5 7.75 V 7 M 14.5 21.25 V 22 M 7.75 14.5 H 7 M 21.25 14.5 H 22"></path>
+              <path d="M 9.63 9.63 L 9.25 9.25 M 9.63 19.38 L 9.25 19.76 M 19.38 9.63 L 19.76 9.25 M 19.38 19.38 L 19.76 19.76"></path>
+            </g>
+            <path d="M 12 12 L 22 2 M 12 12 L 2 22"></path>
+          </svg>
+          <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+          </svg>
+          <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"></path>
+          </svg>
+          <span class="theme-label theme-label-system">system</span>
+          <span class="theme-label theme-label-light">light</span>
+          <span class="theme-label theme-label-dark">dark</span>
+        </button>
       </nav>
     </div>
   </footer>
   <script src="assets/math.js" defer></script>
   <script>
     const THEME_COLORS = { light: '#ffffff', dark: '#141517' };
+    const THEME_MODES = ['system', 'light', 'dark'];
 
     const themeMeta = document.querySelector('meta[name="theme-color"]');
     const themeToggle = document.querySelector('.theme-toggle');
     const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    function storedTheme() {
+    function storedMode() {
       try {
         const value = localStorage.getItem('theme');
         if (value === 'light' || value === 'dark') return value;
@@ -350,51 +429,69 @@
         // Storage can be unavailable, for example in private mode or on file://.
       }
 
-      return null;
+      return 'system';
     }
 
-    function saveTheme(theme) {
+    function saveMode(mode) {
       try {
-        localStorage.setItem('theme', theme);
+        if (mode === 'system') {
+          localStorage.removeItem('theme');
+        } else {
+          localStorage.setItem('theme', mode);
+        }
       } catch (error) {
         // The toggle still works for this page view.
       }
     }
 
-    function applyTheme(theme) {
+    function resolvedTheme(mode) {
+      if (mode === 'light' || mode === 'dark') return mode;
+      return darkQuery.matches ? 'dark' : 'light';
+    }
+
+    function nextMode(mode) {
+      const index = THEME_MODES.indexOf(mode);
+      return THEME_MODES[(index + 1) % THEME_MODES.length];
+    }
+
+    function applyMode(mode) {
+      const theme = resolvedTheme(mode);
+      const next = nextMode(mode);
+
+      document.documentElement.dataset.mode = mode;
+      document.documentElement.dataset.next = next;
       document.documentElement.dataset.theme = theme;
 
       if (themeMeta) themeMeta.content = THEME_COLORS[theme];
 
       if (themeToggle) {
-        const isDark = theme === 'dark';
-        themeToggle.textContent = isDark ? 'light' : 'dark';
-        themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        const label = 'Theme: ' + mode + ' (click for ' + next + ')';
+        themeToggle.setAttribute('aria-label', label);
+        themeToggle.title = label;
       }
     }
 
-    function toggleTheme(event) {
+    function cycleTheme(event) {
       event.preventDefault();
 
-      const current = document.documentElement.dataset.theme;
-      const next = current === 'dark' ? 'light' : 'dark';
+      const mode = nextMode(document.documentElement.dataset.mode || storedMode());
 
-      applyTheme(next);
-      saveTheme(next);
+      applyMode(mode);
+      saveMode(mode);
     }
 
     if (themeToggle) {
-      themeToggle.addEventListener('click', toggleTheme);
+      themeToggle.addEventListener('click', cycleTheme);
     }
 
-    darkQuery.addEventListener('change', function (event) {
-      // A saved choice wins over the system setting.
-      if (storedTheme()) return;
+    darkQuery.addEventListener('change', function () {
+      // The system setting only applies while the toggle is on system.
+      if ((document.documentElement.dataset.mode || 'system') !== 'system') return;
 
-      applyTheme(event.matches ? 'dark' : 'light');
+      applyMode('system');
     });
 
-    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+    applyMode(document.documentElement.dataset.mode || storedMode());
 
     const dateFormat = new Intl.DateTimeFormat('en-CA', {
       year: 'numeric', month: '2-digit', day: '2-digit',
